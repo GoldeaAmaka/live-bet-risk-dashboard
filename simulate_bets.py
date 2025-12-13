@@ -1,31 +1,49 @@
 import time
-from main import get_connection
-from datetime import datetime
 import random
+from main import get_connection
 
-def simulate():
+UPDATE_EVERY_SECONDS = 10
+UPDATE_COUNT = 2  # update 2 existing bets each cycle
+
+def get_existing_bet_ids(conn, limit=500):
+    """Fetch a pool of bet_ids to update (limit keeps it fast)."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT bet_id FROM bets ORDER BY bet_id DESC LIMIT %s;", (limit,))
+        rows = cur.fetchall()
+    return [r[0] for r in rows]
+
+def update_random_bets():
     conn = get_connection()
-    cur = conn.cursor()
+    try:
+        bet_ids = get_existing_bet_ids(conn, limit=500)
 
-    cur.execute("""
-        SELECT market_id, event_id, initial_odds
-        FROM markets;
-    """)
-    markets = cur.fetchall()
+        if len(bet_ids) < UPDATE_COUNT:
+            print("Not enough bets to update. Seed bets first.")
+            return
 
-    while True:
-        for _ in range(2):  # insert 2 bets
-            market_id, event_id, odds = random.choice(markets)
-            customer_id = random.randint(1, 1500)
-            stake = random.randint(5, 10000)
+        chosen_ids = random.sample(bet_ids, UPDATE_COUNT)
 
-            cur.execute("""
-                INSERT INTO bets (event_id, market_id, customer_id, stake, odds)
-                VALUES (%s, %s, %s, %s, %s);
-            """, (event_id, market_id, customer_id, stake, odds))
+        with conn.cursor() as cur:
+            for bet_id in chosen_ids:
+                new_stake = round(random.uniform(5, 200), 2)
+                new_odds = round(random.uniform(1.2, 6.0), 2)
+
+                cur.execute(
+                    """
+                    UPDATE bets
+                    SET stake = %s, odds = %s
+                    WHERE bet_id = %s;
+                    """,
+                    (new_stake, new_odds, bet_id),
+                )
 
         conn.commit()
-        print(f"Inserted 2 bets at {datetime.now().strftime('%H:%M:%S')}")
-        time.sleep(10)  # wait 10 seconds
+        print(f"Updated {UPDATE_COUNT} bets: {chosen_ids}")
 
-simulate()
+    finally:
+        conn.close()
+
+if __name__ == "__main__":
+    while True:
+        update_random_bets()
+        time.sleep(UPDATE_EVERY_SECONDS)
