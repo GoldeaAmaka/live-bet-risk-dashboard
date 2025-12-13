@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-MY_PASSWORD = os.getenv("My_password")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_connection():
     try:
@@ -14,7 +14,7 @@ def get_connection():
             host="localhost",
             database="live_bet_monitoring_system",
             user="postgres",
-            password=MY_PASSWORD,
+            password=DATABASE_URL,
             port=5432
         )
         print("Connected successfully!")
