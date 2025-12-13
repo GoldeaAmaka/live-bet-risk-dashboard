@@ -3,7 +3,7 @@ import random
 from main import get_connection
 
 UPDATE_EVERY_SECONDS = 10
-UPDATE_COUNT = 2  # update 2 existing bets each cycle
+UPDATE_COUNT = 10  # update 2 existing bets each cycle
 
 def get_existing_bet_ids(conn, limit=500):
     """Fetch a pool of bet_ids to update (limit keeps it fast)."""
@@ -25,8 +25,8 @@ def update_random_bets():
 
         with conn.cursor() as cur:
             for bet_id in chosen_ids:
-                new_stake = round(random.uniform(5, 200), 2)
-                new_odds = round(random.uniform(1.2, 6.0), 2)
+                new_stake = round(random.uniform(50, 1500), 2)
+                new_odds = round(random.uniform(1.5, 12.0), 2)
 
                 cur.execute(
                     """

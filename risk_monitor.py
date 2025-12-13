@@ -6,28 +6,34 @@ def check_risk_alerts():
     conn = get_connection()
     cur = conn.cursor()
 
-    # 2. Query ONLY HIGH RISK alerts from the VIEW
+    # 2. Query HIGH and MEDIUM risk alerts from the view
     sql = """
-        SELECT home_team, away_team, outcome, exposure, risk_level
+        SELECT
+            home_team,
+            away_team,
+            outcome,
+            payouts,
+            risk_level
         FROM risk_alerts
-        WHERE risk_level = 'HIGH RISK'
-        ORDER BY exposure DESC;
+        WHERE risk_level IN ('HIGH RISK', 'MEDIUM RISK')
+        ORDER BY payouts DESC;
     """
+
     cur.execute(sql)
     alerts = cur.fetchall()
 
-    print("\n🚨 HIGH RISK ALERTS 🚨\n")
+    print("\n🚨 RISK ALERTS (HIGH & MEDIUM) 🚨\n")
 
-    # 3. If no high-risk alerts, say everything is OK
+    # 3. If no alerts, say everything is OK
     if not alerts:
-        print("✅ No HIGH RISK markets at the moment.")
+        print("✅ No HIGH or MEDIUM risk markets at the moment.")
     else:
-        for home_team, away_team, outcome, exposure, risk_level in alerts:
+        for home_team, away_team, outcome, payouts, risk_level in alerts:
             print(
                 f"{home_team} vs {away_team} | "
                 f"Outcome: {outcome} | "
-                f"Exposure: £{exposure:.2f} | "
-                f"Risk: {risk_level}"
+                f"Potential Payout: £{payouts:,.2f} | "
+                f"Risk Level: {risk_level}"
             )
 
     # 4. Close connection
