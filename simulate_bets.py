@@ -3,7 +3,7 @@ import random
 from main import get_connection
 
 UPDATE_EVERY_SECONDS = 10
-UPDATE_COUNT = 10  # update 2 existing bets each cycle
+UPDATE_COUNT = 5 # update 2 existing bets each cycle
 
 def get_existing_bet_ids(conn, limit=500):
     """Fetch a pool of bet_ids to update (limit keeps it fast)."""
