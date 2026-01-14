@@ -114,7 +114,7 @@ if total_rows > 0:
     )
 
 # ---- TABLE ----
-st.subheader("Top Risk Alerts (sorted by potential payout)")
+st.subheader("Top Risk Alerts")
 if filtered.empty:
     st.info("No rows match your filter yet.")
 else:
